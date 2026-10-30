@@ -18,11 +18,14 @@ jobs:
         with:
           node-version: 18
           cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm install
+        working-directory: backend
 
       - name: Start API and run tests
+        working-directory: backend
         run: |
           node server.js > server.log 2>&1 &
           server_pid=$!
