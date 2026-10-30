@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "Learn Node.js",
+    "description": "Understand the basic JavaScript runtime environment and npm",
+    "completed": true,
+    "createdAt": "2026-08-02T16:45:37.000Z"
+  },
+  {
+    "id": 2,
+    "title": "Build an Express Server",
+    "description": "Construct a backend server and master the middleware pipeline",
+    "completed": false,
+    "createdAt": "2026-08-02T16:45:37.000Z"
+  }
+]
