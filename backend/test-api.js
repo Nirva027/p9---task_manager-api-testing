@@ -118,19 +118,28 @@ async function runTests() {
   // 9. POST /tasks - Valid insertion
   let createdTaskId;
   await assertResponse('POST /tasks with valid body returns 201 Created and new task', async () => {
+    const requestStartedAt = Date.now();
     const res = await fetch(`${BASE_URL}/tasks`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: 'New Validation Task',
-        description: 'Successfully created via fetch client'
+        description: 'Successfully created via fetch client',
+        assignedUser: 'Practical 10 student'
       })
     });
+    const responseElapsedMs = Date.now() - requestStartedAt;
     if (res.status !== 201) throw new Error(`Expected status 201, got ${res.status}`);
     const task = await res.json();
     if (!task.id) throw new Error('Expected task to have an generated ID');
     if (task.title !== 'New Validation Task') throw new Error(`Unexpected title: ${task.title}`);
     if (task.completed !== false) throw new Error('New task should start uncompleted');
+    if (task.assignedUser !== 'Practical 10 student') {
+      throw new Error(`Unexpected assigned user: ${task.assignedUser}`);
+    }
+    if (responseElapsedMs >= 1500) {
+      throw new Error(`Response took ${responseElapsedMs}ms; expected it before the 2-second notification`);
+    }
     createdTaskId = task.id;
   });
 

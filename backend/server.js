@@ -14,6 +14,9 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const taskEvents = require('./events');
+require('./listeners');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const DATA_FILE = path.join(__dirname, 'data', 'tasks.json');
@@ -99,13 +102,20 @@ app.get('/tasks/:id', validateTaskId, (req, res) => {
 
 // POST /tasks - Create a new task (uses JSON payload validation)
 app.post('/tasks', (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, assignedUser } = req.body;
 
   // Validate required input
   if (!title || typeof title !== 'string' || title.trim() === '') {
     return res.status(400).json({
       error: 'Bad Request',
       message: 'Title is required and must be a non-empty string'
+    });
+  }
+
+  if (assignedUser !== undefined && typeof assignedUser !== 'string') {
+    return res.status(400).json({
+      error: 'Bad Request',
+      message: 'Assigned user must be a string'
     });
   }
 
@@ -117,9 +127,15 @@ app.post('/tasks', (req, res) => {
     createdAt: new Date().toISOString()
   };
 
+  if (assignedUser !== undefined && assignedUser.trim() !== '') {
+    newTask.assignedUser = assignedUser.trim();
+  }
+
   tasks.push(newTask);
   saveTasks();
   res.status(201).json(newTask);
+  console.log(`[API] Response sent at ${new Date().toISOString()}`);
+  taskEvents.emit('task-created', newTask);
 });
 
 // PUT /tasks/:id - Update an existing task (uses validateTaskId middleware)
@@ -174,6 +190,7 @@ app.delete('/tasks/:id', validateTaskId, (req, res) => {
     message: 'Task deleted successfully',
     task: deletedTask
   });
+  taskEvents.emit('task-deleted', deletedTask);
 });
 
 // ==========================================
